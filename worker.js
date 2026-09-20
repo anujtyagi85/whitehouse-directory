@@ -1180,7 +1180,7 @@ footer a{color:var(--g);text-decoration:none;font-weight:600}
 <body>
 <header>
   <div class="hrow"><a href="/">← Directory</a><h1>Jobs Board</h1><span style="width:70px"></span></div>
-  <p class="htag">Post a home job &middot; Get bids from local trades &middot; Community suggestions welcome</p>
+  <p class="htag">Post a home job &middot; Get bids from local trades</p>
 </header>
 
 <div class="wrap" id="wrap">
@@ -1469,24 +1469,11 @@ document.getElementById("post-close").addEventListener("click",closePost);
 document.getElementById("post-ov").addEventListener("click",function(e){if(e.target===this)closePost()});
 
 function openResp(projectId,type,posterContact){
-  curProjectId=projectId;curRespType=type;
+  curProjectId=projectId;curRespType="bid";
   document.getElementById("resp-form").style.display="block";
   document.getElementById("resp-success").style.display="none";
   document.getElementById("r-name").value="";document.getElementById("r-phone").value="";
   document.getElementById("r-note").value="";document.getElementById("resp-err").style.display="none";
-  if(type==="bid"){
-    document.getElementById("resp-title").textContent="Express Interest";
-    document.getElementById("r-name-label").textContent="Your name";
-    document.getElementById("r-note-label").innerHTML='Brief note <span style="font-weight:400;color:var(--m)">(optional)</span>';
-    document.getElementById("r-note").placeholder="e.g. available weekends, can start next week…";
-    document.getElementById("resp-submit").textContent="Express Interest";
-  } else {
-    document.getElementById("resp-title").textContent="Suggest Someone";
-    document.getElementById("r-name-label").textContent="Their name";
-    document.getElementById("r-note-label").innerHTML='Why are you recommending them?';
-    document.getElementById("r-note").placeholder="e.g. did our kitchen last year, excellent work…";
-    document.getElementById("resp-submit").textContent="Submit Suggestion";
-  }
   // Show poster contact if we have it
   var cw=document.getElementById("resp-contact-wrap");
   if(posterContact&&posterContact.phone){
@@ -1520,10 +1507,10 @@ async function submitResp(){
     if(!r.ok)throw new Error();
     document.getElementById("resp-form").style.display="none";
     document.getElementById("resp-success").style.display="block";
-    document.getElementById("resp-success-msg").textContent=curRespType==="bid"?"Interest submitted!":"Suggestion submitted!";
+    document.getElementById("resp-success-msg").textContent="Interest submitted!";
     reload();
   }catch(e){document.getElementById("resp-err").textContent="Something went wrong — please try again.";document.getElementById("resp-err").style.display="block"}
-  finally{btn.textContent=curRespType==="bid"?"Express Interest":"Submit Suggestion";btn.disabled=false}
+  finally{btn.textContent="Express Interest";btn.disabled=false}
 }
 
 // ── Render projects ────────────────────────────────────────────────────────
@@ -1557,8 +1544,7 @@ function renderProjects(){
         +'<a href="tel:'+p.contactPhone+'">&#128222; '+p.contactPhone+'</a>'
         +'</div>':"")
       +'<div class="pactions">'
-      +'<button class="btn-apply" data-pid="'+p.id+'" data-type="bid" data-cname="'+esc(p.contactName||'')+'" data-cphone="'+esc(p.contactPhone||'')+'">&#x1F44B; Interested</button>'
-      +'<button class="btn-suggest" data-pid="'+p.id+'" data-type="suggestion">&#x1F4A1; Know someone?</button>'
+      +'<button class="btn-apply" data-pid="'+p.id+'" data-type="bid" data-cname="'+esc(p.contactName||'')+'" data-cphone="'+esc(p.contactPhone||'')+'">&#x1F44B; I\'m Interested</button>'
       +'</div>'
       +'<div style="text-align:right;margin-top:4px"><button class="btn-report" data-pid="'+p.id+'" data-type="report" style="background:none;border:none;font-size:.72rem;color:#9ca3af;cursor:pointer;padding:2px 4px">&#9872; Report</button></div>'
       +'<div class="pfoot"><span>'+p.responseCount+' interest'+(p.responseCount===1?'':'s')+'</span><span>'+timeAgo(p.createdAt)+'</span></div>'

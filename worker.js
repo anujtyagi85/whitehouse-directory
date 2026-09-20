@@ -1885,6 +1885,20 @@ td{padding:10px 14px;vertical-align:middle}
     </div>
   </div>
 </div>
+<!-- Notify traders modal -->
+<div class="ov hidden" id="notify-modal">
+  <div class="mo" style="max-width:460px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <h2 style="font-size:1rem;margin:0">&#128172; Notify Traders</h2>
+      <button onclick="document.getElementById('notify-modal').classList.add('hidden')" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--m);line-height:1">&#x2715;</button>
+    </div>
+    <div id="notify-content"></div>
+    <div style="margin-top:16px;text-align:right">
+      <button onclick="document.getElementById('notify-modal').classList.add('hidden')" class="btn2 bg2">Done</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 <script>
 var pw="",svcs=[],editId=null,delId=null,aq="";
@@ -1997,8 +2011,11 @@ function renderJobs(){
       +'<div class="jcard-meta">'+esc(j.category)+' &nbsp;·&nbsp; '+esc(j.budget)+' &nbsp;·&nbsp; '+esc(j.timeline)+'</div>'
       +(j.description?'<div style="font-size:.83rem;color:var(--m);margin-bottom:6px">'+esc(j.description)+'</div>':"")
       +'<div class="jcard-contact">&#x1F4DE; '+esc(contacts)+'</div>'
-      +'<div style="font-size:.78rem;color:var(--m);margin-bottom:8px">'+((j.responses||[]).length)+' response(s) &nbsp;·&nbsp; posted '+new Date(j.createdAt).toLocaleDateString("en-GB")+'</div>'
-      +'<button onclick="adminCloseJob(\''+j.id+'\')" style="background:#fee2e2;color:#dc2626;border:none;border-radius:6px;padding:6px 12px;font-size:.8rem;cursor:pointer">Remove post</button>'
+      +'<div style="font-size:.78rem;color:var(--m);margin-bottom:10px">'+((j.responses||[]).length)+' response(s) &nbsp;·&nbsp; posted '+new Date(j.createdAt).toLocaleDateString("en-GB")+'</div>'
+      +'<div style="display:flex;gap:8px;flex-wrap:wrap">'
+      +'<button onclick="notifyTraders(\''+j.id+'\')" style="background:#dcfce7;color:#166534;border:none;border-radius:6px;padding:7px 13px;font-size:.82rem;font-weight:600;cursor:pointer">&#128172; Notify traders</button>'
+      +'<button onclick="adminCloseJob(\''+j.id+'\')" style="background:#fee2e2;color:#dc2626;border:none;border-radius:6px;padding:7px 13px;font-size:.8rem;cursor:pointer">Remove post</button>'
+      +'</div>'
       +'</div>';
   }).join("");
 }
@@ -2008,6 +2025,41 @@ async function adminCloseJob(id){
   if(r.ok){jobs=[];await loadJobs();toast("Job post removed");}
   else toast("Something went wrong");
 }
+
+function toWaNum(phone){
+  var n=(phone||"").replace(/[\\s\\-\\+\\(\\)]/g,"");
+  if(n.startsWith("07")&&n.length===11)return"44"+n.slice(1);
+  if(n.startsWith("447"))return n;
+  return n;
+}
+function notifyTraders(jobId){
+  var job=jobs.find(function(j){return j.id===jobId;});
+  if(!job)return;
+  var traders=svcs.filter(function(s){return s.category===job.category&&(s.phone||s.wa);});
+  var msg=encodeURIComponent(
+    "Hi, a Whitehouse resident needs help with: "+job.title+
+    ". Budget: "+job.budget+", needed: "+job.timeline+
+    ". See the full post at whitehousemk.uk/projects — tap ‘Interested’ if you can help!"
+  );
+  var nc=document.getElementById("notify-content");
+  if(!traders.length){
+    nc.innerHTML='<p style="color:var(--m);font-size:.88rem">No traders with phone numbers found in <strong>'+esc(job.category)+'</strong> in the directory. Add their phone numbers to the directory first.</p>';
+  } else {
+    nc.innerHTML='<p style="font-size:.83rem;color:var(--m);margin-bottom:14px">'+traders.length+' trader(s) in <strong>'+esc(job.category)+'</strong>. Tap WhatsApp to message each one.</p>'
+      +traders.map(function(t){
+        var phone=t.wa||t.phone;
+        var waLink="https://wa.me/"+toWaNum(phone)+"?text="+msg;
+        return'<div style="display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--b)">'
+          +'<div><div style="font-weight:600;font-size:.88rem">'+esc(t.name)+'</div>'
+          +'<div style="font-size:.75rem;color:var(--m)">'+esc(phone)+'</div></div>'
+          +'<a href="'+waLink+'" target="_blank" style="background:#25d366;color:#fff;border-radius:7px;padding:7px 13px;font-size:.82rem;font-weight:700;text-decoration:none;flex-shrink:0;margin-left:12px">&#128172; WhatsApp</a>'
+          +'</div>';
+      }).join("");
+  }
+  document.getElementById("notify-modal").classList.remove("hidden");
+}
+
+document.getElementById("notify-modal").addEventListener("click",function(e){if(e.target===this)this.classList.add("hidden");});
 document.getElementById("cc").addEventListener("click",function(){document.getElementById("co").classList.add("hidden");delId=null});
 document.getElementById("cd").addEventListener("click",async function(){
   if(!delId)return;

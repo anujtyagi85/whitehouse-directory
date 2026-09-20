@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin – Whitehouse Directory</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --green: #2d6a4f;
+      --green-light: #40916c;
+      --green-pale: #d8f3dc;
+      --red: #dc2626;
+      --red-pale: #fee2e2;
+      --text: #1b1b1b;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --bg: #f9fafb;
+      --card: #ffffff;
+    }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    /* ── Login screen ── */
+    #login-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+    .login-box { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 40px 36px; width: 100%; max-width: 380px; box-shadow: 0 4px 24px rgba(0,0,0,0.07); }
+    .login-box h1 { font-size: 1.3rem; color: var(--green); margin-bottom: 6px; }
+    .login-box p  { font-size: 0.85rem; color: var(--muted); margin-bottom: 24px; }
+    .login-box label { display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 6px; }
+    .login-box input[type=password] { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 7px; font-size: 1rem; outline: none; margin-bottom: 16px; }
+    .login-box input[type=password]:focus { border-color: var(--green-light); }
+    .login-error { font-size: 0.82rem; color: var(--red); margin-bottom: 12px; display: none; }
+
+    /* ── App shell ── */
+    #app { display: none; }
+    header { background: var(--green); color: white; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; }
+    header h1 { font-size: 1.1rem; font-weight: 700; }
+    header .header-right { display: flex; gap: 10px; align-items: center; }
+    header a { color: rgba(255,255,255,0.8); text-decoration: none; font-size: 0.85rem; }
+    header a:hover { color: white; }
+
+    .toolbar { padding: 14px 20px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; border-bottom: 1px solid var(--border); background: white; }
+    .toolbar input[type=search] { flex: 1; min-width: 180px; padding: 8px 12px; border: 1.5px solid var(--border); border-radius: 7px; font-size: 0.9rem; outline: none; }
+    .toolbar input[type=search]:focus { border-color: var(--green-light); }
+    .stats { font-size: 0.82rem; color: var(--muted); margin-left: auto; white-space: nowrap; }
+
+    /* ── Buttons ── */
+    .btn { padding: 8px 16px; border-radius: 7px; border: none; font-size: 0.85rem; font-weight: 500; cursor: pointer; transition: all 0.15s; }
+    .btn-primary   { background: var(--green); color: white; }
+    .btn-primary:hover   { background: var(--green-light); }
+    .btn-danger    { background: var(--red-pale); color: var(--red); }
+    .btn-danger:hover    { background: #fca5a5; }
+    .btn-ghost     { background: transparent; color: var(--muted); border: 1.5px solid var(--border); }
+    .btn-ghost:hover     { border-color: var(--green-light); color: var(--green); }
+    .btn-sm { padding: 5px 10px; font-size: 0.78rem; }
+
+    /* ── Table ── */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.87rem; }
+    thead th { background: #f3f4f6; text-align: left; padding: 10px 14px; font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); border-bottom: 1px solid var(--border); white-space: nowrap; }
+    tbody tr { border-bottom: 1px solid var(--border); }
+    tbody tr:hover { background: #fafafa; }
+    td { padding: 10px 14px; vertical-align: middle; }
+    td.name-cell { font-weight: 500; }
+    td.cat-cell span { background: var(--green-pale); color: var(--green); font-size: 0.72rem; font-weight: 600; padding: 2px 7px; border-radius: 4px; }
+    td.contact-cell { color: var(--muted); font-size: 0.82rem; line-height: 1.5; }
+    td.actions-cell { white-space: nowrap; display: flex; gap: 6px; }
+
+    /* ── Modal ── */
+    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .overlay.hidden { display: none; }
+    .modal { background: white; border-radius: 12px; padding: 28px; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; }
+    .modal h2 { font-size: 1.1rem; margin-bottom: 20px; }
+    .field { margin-bottom: 14px; }
+    .field label { display: block; font-size: 0.82rem; font-weight: 500; margin-bottom: 5px; }
+    .field input, .field select, .field textarea {
+      width: 100%; padding: 9px 11px; border: 1.5px solid var(--border);
+      border-radius: 7px; font-size: 0.9rem; outline: none; font-family: inherit;
+    }
+    .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--green-light); }
+    .field textarea { resize: vertical; min-height: 72px; }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+
+    /* ── Confirm dialog ── */
+    .confirm-box { background: white; border-radius: 10px; padding: 24px; max-width: 360px; width: 100%; }
+    .confirm-box h3 { margin-bottom: 10px; }
+    .confirm-box p  { font-size: 0.88rem; color: var(--muted); margin-bottom: 20px; }
+    .confirm-actions { display: flex; gap: 10px; justify-content: flex-end; }
+
+    /* ── Toast ── */
+    #toast { position: fixed; bottom: 24px; right: 24px; background: #1b1b1b; color: white; padding: 10px 18px; border-radius: 8px; font-size: 0.88rem; opacity: 0; transition: opacity 0.2s; pointer-events: none; z-index: 200; }
+    #toast.show { opacity: 1; }
+
+    .empty-state { text-align: center; padding: 60px 20px; color: var(--muted); }
+  </style>
+</head>
+<body>
+
+<!-- Login -->
+<div id="login-screen">
+  <div class="login-box">
+    <h1>Whitehouse Directory</h1>
+    <p>Admin panel — enter your password to continue</p>
+    <label for="pw">Password</label>
+    <input type="password" id="pw" placeholder="••••••••" autofocus />
+    <div class="login-error" id="login-error">Incorrect password. Try again.</div>
+    <button class="btn btn-primary" style="width:100%" id="login-btn">Sign in</button>
+  </div>
+</div>
+
+<!-- App -->
+<div id="app">
+  <header>
+    <h1>Whitehouse Directory &mdash; Admin</h1>
+    <div class="header-right">
+      <a href="/">View public site</a>
+      <button class="btn btn-ghost btn-sm" id="logout-btn" style="color:white;border-color:rgba(255,255,255,0.4)">Log out</button>
+    </div>
+  </header>
+
+  <div class="toolbar">
+    <input type="search" id="admin-search" placeholder="Search services…" />
+    <button class="btn btn-primary" id="add-btn">+ Add service</button>
+    <span class="stats" id="admin-stats"></span>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Category</th>
+          <th>Contact</th>
+          <th>Description</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+    </table>
+    <div class="empty-state" id="empty-state" style="display:none">No services found.</div>
+  </div>
+</div>
+
+<!-- Add / Edit modal -->
+<div class="overlay hidden" id="modal-overlay">
+  <div class="modal">
+    <h2 id="modal-title">Add service</h2>
+    <div class="field">
+      <label>Name *</label>
+      <input type="text" id="f-name" placeholder="e.g. Joe's Plumbing" />
+    </div>
+    <div class="field">
+      <label>Category *</label>
+      <input type="text" id="f-category" list="cat-list" placeholder="e.g. Plumbers" />
+      <datalist id="cat-list"></datalist>
+    </div>
+    <div class="field">
+      <label>Phone</label>
+      <input type="tel" id="f-phone" placeholder="07700 900123" />
+    </div>
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="f-email" placeholder="hello@example.com" />
+    </div>
+    <div class="field">
+      <label>Website</label>
+      <input type="url" id="f-website" placeholder="https://example.com" />
+    </div>
+    <div class="field">
+      <label>Description</label>
+      <textarea id="f-description" placeholder="What they offer, any notes…"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="modal-cancel">Cancel</button>
+      <button class="btn btn-primary" id="modal-save">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm delete modal -->
+<div class="overlay hidden" id="confirm-overlay">
+  <div class="confirm-box">
+    <h3>Delete service?</h3>
+    <p id="confirm-msg">This cannot be undone.</p>
+    <div class="confirm-actions">
+      <button class="btn btn-ghost" id="confirm-cancel">Cancel</button>
+      <button class="btn btn-danger" id="confirm-delete">Delete</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+let password = "";
+let services = [];
+let editingId = null;
+let deletingId = null;
+let adminQuery = "";
+
+// ── Auth ──────────────────────────────────────────────────────
+async function tryLogin(pw) {
+  // Validate password by calling a real API endpoint
+  const res = await fetch("/api/services", { headers: { "X-Admin-Password": pw } });
+  // A 200 on services means the server is up; we verify the password by
+  // attempting a dummy POST and checking for 401 vs other responses.
+  const check = await fetch("/api/services", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "X-Admin-Password": pw },
+    body: JSON.stringify({ __auth_check: true }),
+  });
+  // 400 = bad data but auth passed. 401 = wrong password.
+  return check.status !== 401;
+}
+
+document.getElementById("login-btn").addEventListener("click", login);
+document.getElementById("pw").addEventListener("keydown", e => { if (e.key === "Enter") login(); });
+
+async function login() {
+  const pw = document.getElementById("pw").value;
+  if (!pw) return;
+  document.getElementById("login-btn").textContent = "Signing in…";
+  document.getElementById("login-btn").disabled = true;
+  const ok = await tryLogin(pw);
+  if (ok) {
+    password = pw;
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("app").style.display = "block";
+    loadServices();
+  } else {
+    document.getElementById("login-error").style.display = "block";
+    document.getElementById("login-btn").textContent = "Sign in";
+    document.getElementById("login-btn").disabled = false;
+  }
+}
+
+document.getElementById("logout-btn").addEventListener("click", () => {
+  password = "";
+  location.reload();
+});
+
+// ── Data ──────────────────────────────────────────────────────
+async function loadServices() {
+  const res = await fetch("/api/services");
+  services = await res.json();
+  renderTable();
+}
+
+function getCategories() {
+  return [...new Set(services.map(s => s.category))].sort();
+}
+
+// ── Table ──────────────────────────────────────────────────────
+function renderTable() {
+  const q = adminQuery.toLowerCase();
+  const filtered = services.filter(s =>
+    !q ||
+    (s.name || "").toLowerCase().includes(q) ||
+    (s.category || "").toLowerCase().includes(q) ||
+    (s.description || "").toLowerCase().includes(q) ||
+    (s.phone || "").toLowerCase().includes(q)
+  );
+
+  document.getElementById("admin-stats").textContent =
+    `${filtered.length} of ${services.length} services`;
+
+  const tbody = document.getElementById("table-body");
+  const empty = document.getElementById("empty-state");
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = "";
+    empty.style.display = "block";
+    return;
+  }
+  empty.style.display = "none";
+
+  tbody.innerHTML = filtered.map(s => {
+    const contact = [s.phone, s.email, s.website].filter(Boolean).join("<br>");
+    return `<tr>
+      <td class="name-cell">${esc(s.name)}</td>
+      <td class="cat-cell"><span>${esc(s.category)}</span></td>
+      <td class="contact-cell">${contact ? contact : '<span style="color:var(--border)">—</span>'}</td>
+      <td class="contact-cell">${s.description ? esc(s.description) : '<span style="color:var(--border)">—</span>'}</td>
+      <td class="actions-cell">
+        <button class="btn btn-ghost btn-sm" onclick="openEdit('${s.id}')">Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="openDelete('${s.id}')">Delete</button>
+      </td>
+    </tr>`;
+  }).join("");
+}
+
+document.getElementById("admin-search").addEventListener("input", e => {
+  adminQuery = e.target.value;
+  renderTable();
+});
+
+// ── Add / Edit modal ──────────────────────────────────────────
+document.getElementById("add-btn").addEventListener("click", () => openModal(null));
+document.getElementById("modal-cancel").addEventListener("click", closeModal);
+document.getElementById("modal-overlay").addEventListener("click", e => { if (e.target === e.currentTarget) closeModal(); });
+
+function openModal(id) {
+  editingId = id;
+  const s = id ? services.find(x => x.id === id) : null;
+  document.getElementById("modal-title").textContent = id ? "Edit service" : "Add service";
+  document.getElementById("f-name").value        = s?.name        || "";
+  document.getElementById("f-category").value    = s?.category    || "";
+  document.getElementById("f-phone").value       = s?.phone       || "";
+  document.getElementById("f-email").value       = s?.email       || "";
+  document.getElementById("f-website").value     = s?.website     || "";
+  document.getElementById("f-description").value = s?.description || "";
+
+  // Populate category suggestions
+  const dl = document.getElementById("cat-list");
+  dl.innerHTML = getCategories().map(c => `<option value="${esc(c)}">`).join("");
+
+  document.getElementById("modal-overlay").classList.remove("hidden");
+  document.getElementById("f-name").focus();
+}
+
+function closeModal() {
+  document.getElementById("modal-overlay").classList.add("hidden");
+  editingId = null;
+}
+
+document.getElementById("modal-save").addEventListener("click", async () => {
+  const name     = document.getElementById("f-name").value.trim();
+  const category = document.getElementById("f-category").value.trim();
+  if (!name || !category) { toast("Name and category are required"); return; }
+
+  const payload = {
+    name, category,
+    phone:       document.getElementById("f-phone").value.trim() || undefined,
+    email:       document.getElementById("f-email").value.trim() || undefined,
+    website:     document.getElementById("f-website").value.trim() || undefined,
+    description: document.getElementById("f-description").value.trim() || undefined,
+  };
+
+  const btn = document.getElementById("modal-save");
+  btn.textContent = "Saving…";
+  btn.disabled = true;
+
+  try {
+    let res;
+    if (editingId) {
+      res = await fetch(`/api/services/${editingId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", "X-Admin-Password": password },
+        body: JSON.stringify(payload),
+      });
+    } else {
+      res = await fetch("/api/services", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-Admin-Password": password },
+        body: JSON.stringify(payload),
+      });
+    }
+    if (res.status === 401) { toast("Session expired — please log in again"); location.reload(); return; }
+    if (!res.ok) throw new Error("Save failed");
+    await loadServices();
+    closeModal();
+    toast(editingId ? "Service updated" : "Service added");
+  } catch {
+    toast("Something went wrong. Please try again.");
+  } finally {
+    btn.textContent = "Save";
+    btn.disabled = false;
+  }
+});
+
+// ── Delete confirm ────────────────────────────────────────────
+function openDelete(id) {
+  deletingId = id;
+  const s = services.find(x => x.id === id);
+  document.getElementById("confirm-msg").textContent = `Delete "${s?.name}"? This cannot be undone.`;
+  document.getElementById("confirm-overlay").classList.remove("hidden");
+}
+
+document.getElementById("confirm-cancel").addEventListener("click", () => {
+  document.getElementById("confirm-overlay").classList.add("hidden");
+  deletingId = null;
+});
+
+document.getElementById("confirm-delete").addEventListener("click", async () => {
+  if (!deletingId) return;
+  const btn = document.getElementById("confirm-delete");
+  btn.textContent = "Deleting…";
+  btn.disabled = true;
+  try {
+    const res = await fetch(`/api/services/${deletingId}`, {
+      method: "DELETE",
+      headers: { "X-Admin-Password": password },
+    });
+    if (res.status === 401) { toast("Session expired — please log in again"); location.reload(); return; }
+    if (!res.ok) throw new Error();
+    document.getElementById("confirm-overlay").classList.add("hidden");
+    deletingId = null;
+    await loadServices();
+    toast("Service deleted");
+  } catch {
+    toast("Something went wrong. Please try again.");
+  } finally {
+    btn.textContent = "Delete";
+    btn.disabled = false;
+  }
+});
+
+// ── Utils ──────────────────────────────────────────────────────
+function esc(str) {
+  return String(str || "")
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;");
+}
+
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove("show"), 3000);
+}
+</script>
+</body>
+</html>

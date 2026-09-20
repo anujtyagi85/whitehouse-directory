@@ -1,0 +1,8 @@
+name = "whitehouse-dir"
+main = "worker.js"
+compatibility_date = "2024-01-01"
+account_id = "55436d9313166defacdc68163abce2d2"
+
+[[kv_namespaces]]
+binding = "SERVICES_KV"
+id = "ad9f91f24a874876a68af4beff73a53f"

@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Whitehouse Community Services Directory</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --green: #2d6a4f;
+      --green-light: #40916c;
+      --green-pale: #d8f3dc;
+      --green-call: #ecfdf5;
+      --green-call-border: #6ee7b7;
+      --text: #111827;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --bg: #f3f4f6;
+      --card: #ffffff;
+    }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    /* ── Header ── */
+    header {
+      background: linear-gradient(135deg, #1b4332 0%, #2d6a4f 100%);
+      color: white;
+      padding: 20px 16px 18px;
+      text-align: center;
+    }
+    header h1 { font-size: 1.45rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.2; }
+    header p  { margin-top: 4px; font-size: 0.82rem; opacity: 0.8; }
+
+    /* ── Sticky search ── */
+    .search-bar {
+      background: var(--green-light);
+      padding: 10px 14px;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    .search-bar input {
+      width: 100%;
+      max-width: 640px;
+      display: block;
+      margin: 0 auto;
+      padding: 11px 16px 11px 40px;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      outline: none;
+      background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%239ca3af' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.099zm-5.242 1.156a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11z'/%3E%3C/svg%3E") no-repeat 13px center;
+    }
+
+    /* ── Category pills — horizontal scroll, never wraps ── */
+    .filters {
+      display: flex;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      gap: 8px;
+      padding: 12px 14px;
+      background: white;
+      border-bottom: 1px solid var(--border);
+    }
+    .filters::-webkit-scrollbar { display: none; }
+    .filter-btn {
+      flex-shrink: 0;
+      padding: 7px 16px;
+      border-radius: 999px;
+      border: 1.5px solid var(--border);
+      background: white;
+      font-size: 0.82rem;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+      color: var(--text);
+      transition: all 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .filter-btn.active {
+      background: var(--green);
+      color: white;
+      border-color: var(--green);
+      font-weight: 600;
+    }
+
+    /* ── Results count ── */
+    .results-info {
+      padding: 10px 16px 6px;
+      font-size: 0.78rem;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    /* ── Cards: single column on mobile, grid on wider screens ── */
+    .grid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 6px 12px 72px;
+      max-width: 680px;
+      margin: 0 auto;
+    }
+    @media (min-width: 600px) {
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        max-width: 960px;
+        padding: 12px 20px 60px;
+      }
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--green);
+      border-radius: 12px;
+      padding: 14px 14px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+    .card-category {
+      display: inline-block;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--green);
+      background: var(--green-pale);
+      padding: 2px 7px;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+    .card-name { font-size: 1.05rem; font-weight: 700; line-height: 1.25; color: var(--text); }
+    .card-desc { font-size: 0.82rem; color: var(--muted); line-height: 1.45; }
+
+    /* ── Contact actions ── */
+    .card-actions { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 6px; }
+    .btn-call {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--green-call);
+      color: #065f46;
+      border: 1px solid var(--green-call-border);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      text-decoration: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-call:active { background: #d1fae5; }
+    .btn-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #f9fafb;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      text-decoration: none;
+      -webkit-tap-highlight-color: transparent;
+      max-width: 180px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .btn-link:active { background: #f3f4f6; }
+
+    .state-msg { text-align: center; padding: 60px 20px; color: var(--muted); }
+    .state-msg p:first-child { font-size: 2rem; margin-bottom: 8px; }
+
+    footer { text-align: center; font-size: 0.72rem; color: var(--muted); padding: 16px 20px 28px; border-top: 1px solid var(--border); }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Whitehouse Community Services</h1>
+  <p>Milton Keynes &nbsp;·&nbsp; Local trades and services recommended by your neighbours</p>
+</header>
+
+<div class="search-bar">
+  <input type="search" id="search" placeholder="Search by name, service, or keyword..." autocomplete="off" />
+</div>
+
+<div class="filters" id="filters"></div>
+<div class="results-info" id="results-info"></div>
+<div class="grid" id="grid"></div>
+
+<footer>
+  Whitehouse Community Directory &nbsp;·&nbsp; Last updated April 2026
+</footer>
+
+<script>
+// ============================================================
+//  SERVICES DATA — edit this list to add / remove / update
+//  entries. All fields except name and category are optional.
+// ============================================================
+const SERVICES = [
+  { name: "Andrew Jones", category: "Plumbers", phone: "07845 915231", description: "Plumbing, electrical, kitchens, bathrooms" },
+  { name: "Taleb Plumbing", category: "Plumbers", phone: "07786 402490" },
+  { name: "Javed Plumbing", category: "Plumbers", phone: "07949 205199" },
+  { name: "KDA Plumbing and Heating", category: "Plumbers", phone: "07535 244616" },
+  { name: "Davidson Heating and Plumbing", category: "Plumbers", description: "Boiler servicing" },
+  { name: "Rob Heating and Plumbing", category: "Plumbers", description: "Contact via Facebook" },
+  { name: "Siva Heating and Plumbing", category: "Plumbers", phone: "+44 7595 659985" },
+  { name: "Vimal Technician", category: "Plumbers", phone: "+44 7438 258462", description: "Plumbing, electrical, carpet" },
+  { name: "Chris CNS Boiler", category: "Plumbers", phone: "+44 7946 662808" },
+  { name: "Aaron", category: "Plumbers", phone: "+44 7713 018006" },
+  { name: "George Boland – GB Electrical", category: "Electricians", phone: "07411 689970", description: "Whitehouse based" },
+  { name: "Andrew Jones", category: "Electricians", phone: "07845 915231", description: "Electrical installs and repairs" },
+  { name: "Andrew Hudson", category: "Electricians", phone: "+44 7917 612309", description: "Handyman and electrician" },
+  { name: "RiverRun Decorating – Tony", category: "Decorating & Flooring", phone: "07748116331" },
+  { name: "Sea Bonito Event Decoration", category: "Decorating & Flooring", phone: "07830406886", website: "https://www.instagram.com/sea_bonito_decor" },
+  { name: "Costel Covaci", category: "Decorating & Flooring", phone: "0794 359 3667", description: "Specialist in engineered, laminate and LVT flooring" },
+  { name: "Shenley Flooring", category: "Decorating & Flooring", description: "Vinyl and bathroom flooring" },
+  { name: "Martyn", category: "Handymen & Maintenance", phone: "07772 629806", description: "Furniture assembly, garden maintenance, general home maintenance" },
+  { name: "Trevor Long – The Appliance Man", category: "Handymen & Maintenance", phone: "07581017211" },
+  { name: "Ashraf – Carpenter & Handyman", category: "Handymen & Maintenance", phone: "07570449055", description: "Doors, shelves, curtain rails, TV wall mounting, general woodwork. Always available." },
+  { name: "Andrew Hudson", category: "Handymen & Maintenance", phone: "+44 7917 612309", description: "Handyman and electrician" },
+  { name: "Harry Gardening MK", category: "Gardening & Landscaping", phone: "+44 7455 917027" },
+  { name: "Glen Gardener", category: "Gardening & Landscaping", phone: "+44 7894 428946" },
+  { name: "Richard Gardener", category: "Gardening & Landscaping", phone: "+44 7412 452457" },
+  { name: "JLR Garden Maintenance", category: "Gardening & Landscaping", phone: "+44 7788 213772" },
+  { name: "Peter Gardener", category: "Gardening & Landscaping", phone: "+44 7754 812350" },
+  { name: "Pawel Window Cleaner", category: "Window Cleaning", phone: "07598 982444" },
+  { name: "Top Cat Window Cleaning – Terry", category: "Window Cleaning", phone: "07947 696751" },
+  { name: "Spotless Window Cleaning", category: "Window Cleaning", website: "https://spotlessmk.co.uk" },
+  { name: "Roberts Window Cleaning", category: "Window Cleaning", description: "Recommended" },
+  { name: "Ioana – Local Cleaner", category: "Cleaning & Car Valeting", phone: "07778664710" },
+  { name: "Spotless MK", category: "Cleaning & Car Valeting", website: "https://spotlessmk.co.uk" },
+  { name: "Wecasa Cleaning", category: "Cleaning & Car Valeting", website: "https://wecasa.co.uk/domestic-cleaning" },
+  { name: "Cleaner Bins MK", category: "Cleaning & Car Valeting", description: "Wheelie bin cleaning" },
+  { name: "MK Pure Valet", category: "Cleaning & Car Valeting", phone: "+44 7591 087655", description: "Premium car care" },
+  { name: "CCM Blinds – Callum", category: "Blinds & Interiors", phone: "07702 657961", website: "https://ccmblinds.com" },
+  { name: "Diya Design LTD – Dee", category: "Design Services", phone: "07903885992", email: "info@diyadesign.com", description: "Logo design, branding, website design & digital design services" },
+  { name: "Karishma – GCSE Tutor", category: "Childcare & Tutors", phone: "+44 7448 610242" },
+  { name: "Abirami Maths Tuition", category: "Childcare & Tutors", phone: "+44 7551 353189" },
+  { name: "SENshine Tutoring – Karina Mistry", category: "Childcare & Tutors", phone: "07884939973", email: "SENshinetutoring.mk@gmail.com", description: "1:1 tutoring" },
+  { name: "Ashbourne Nursery", category: "Childcare & Tutors", description: "Oxley Park. Excellent reputation." },
+  { name: "Ducklings Preschool", category: "Childcare & Tutors", description: "Friendly, multiple branches." },
+  { name: "Acorn Nurseries", category: "Childcare & Tutors", description: "Jubilee Wood / Cold Harbour / Shenley. Highly rated." },
+  { name: "Woodlands Nursery", category: "Childcare & Tutors", description: "Downs Barn. Highly praised." },
+  { name: "Hampstead Gate Nursery", category: "Childcare & Tutors", description: "Positive feedback from parents." },
+  { name: "Small Wonders", category: "Childcare & Tutors", description: "Crownhill. Recommended by parents." },
+  { name: "Magic Hands Andria", category: "Hair & Beauty", phone: "+44 7999 792107", description: "Mobile hair and styling" },
+  { name: "Rachel's Salon Room", category: "Hair & Beauty", phone: "07512 608473", description: "Home salon" },
+  { name: "Leafy – Mobile Hairdresser", category: "Hair & Beauty", phone: "07983 225616" },
+  { name: "Arthi – Hair & Makeup", category: "Hair & Beauty", phone: "+44 7809 446769", description: "Hair and makeup, Great Holm" },
+  { name: "360 Hair & Scalp", category: "Hair & Beauty", phone: "07707606091", website: "https://www.360hairandscalp.com", description: "Hair restoration clinic, certified trichologist" },
+  { name: "Ushi's Beauty", category: "Hair & Beauty", phone: "07866 335938", description: "Waxing and threading beauty services" },
+  { name: "Henna By Moxa", category: "Bridal & Henna", website: "https://www.instagram.com/hennabymoxa", description: "Recommended henna artist" },
+  { name: "Bhumika – Henna Artist", category: "Bridal & Henna", description: "Local henna artist" },
+  { name: "Waggy Tales Dog Daycare", category: "Pet Services", website: "https://waggytales-dogdaycare.co.uk" },
+  { name: "Janey – Dog Walker & Pet Sitter", category: "Pet Services", description: "Contact via Facebook" },
+  { name: "Cross Roads Kennels", category: "Pet Services", description: "Recommended" },
+  { name: "Kingswood Farm Kennels", category: "Pet Services", description: "Recommended" },
+  { name: "Just Idlies", category: "Food & Catering", phone: "07880 315565", description: "Catering and tiffin meals" },
+  { name: "A Mocktail Fusion Ltd", category: "Food & Catering", phone: "07539 637794", description: "Event drinks, desserts, snacks" },
+  { name: "Assma's Kitchen – Egyptian Food", category: "Food & Catering", phone: "07789122167" },
+  { name: "Mo's Kitchen", category: "Food & Catering", phone: "07428214725", description: "Luxury catering, African cuisine, cakes & cake pops" },
+  { name: "Uni Food Kitchen", category: "Food & Catering", phone: "+44 7938 893318", description: "Birthday cakes and Turkish food" },
+  { name: "Rasaa – Indian Catering", category: "Food & Catering", phone: "+44 7823798524", website: "https://www.rasaaindiankitchen.com", description: "Indian grazing tables and catering services" },
+  { name: "Rizwaan – Driving Instructor", category: "Driving Instructors", phone: "07399 121786" },
+  { name: "Kamal – Driving Instructor", category: "Driving Instructors", phone: "+44 7903 882994" },
+  { name: "Sam Gomes – Driving Instructor", category: "Driving Instructors", phone: "+44 7854 131989" },
+  { name: "Leah – LM Driving", category: "Driving Instructors", phone: "+44 7599 466957" },
+  { name: "Dan Woodall – Driving Instructor", category: "Driving Instructors", description: "Recommended" },
+  { name: "Sonjoy Saha – Driving Instructor", category: "Driving Instructors", phone: "+44 7411309963" },
+  { name: "Sandlight Travels", category: "Travel", phone: "07403 849749" },
+  { name: "Wahid Archery", category: "Event Services", phone: "07472 142963", description: "Mobile archery events" },
+  { name: "Sea Bonito Event Decorations", category: "Event Services", phone: "07830406886", website: "https://www.instagram.com/sea_bonito_decor" },
+  { name: "Mani's Cab Service", category: "Taxis & Transport", phone: "07780 208667" },
+  { name: "Andy Cushion – Man With Van", category: "Taxis & Transport", phone: "+44 7850 479650" },
+  { name: "Nigel – Man With Van", category: "Taxis & Transport", phone: "+44 7973 317334" },
+  { name: "Pawel Szup – Man With Van", category: "Taxis & Transport", phone: "+44 7365 815674" },
+  { name: "Dan Garside – Local Locksmith", category: "Locksmiths", phone: "+44 7984 866788" },
+  { name: "Lindal Security Limited", category: "Locksmiths", phone: "01908 645414", description: "Key cutting services" },
+  { name: "Tobias – Physiotherapy & Fitness", category: "Health & Fitness", phone: "07880 901403" },
+  { name: "Invicta Accounting – Neil", category: "Financial Services", phone: "+44 7814 497130" },
+  { name: "The Mortgage Store – Agnieszka", category: "Financial Services", phone: "07956 236803", email: "agnieszkas@the-mortgagestore.co.uk", description: "Mortgages and protection" },
+  { name: "STAG Wealth Management – Wojciech", category: "Financial Services", phone: "07714 713353", email: "w.symonowicz@sjpp.co.uk", website: "https://www.stagwealthmanagement.co.uk", description: "Pensions and investments" },
+  { name: "Light Tax Limited – Roxana", category: "Financial Services", phone: "07916 151838", email: "roxana@light-tax.co.uk", description: "Qualified accountant" },
+  { name: "D'Morj Photography", category: "Photography", phone: "+44 7471 389211" },
+  { name: "PranaLight Yoga – Neha", category: "Classes & Activities", phone: "07429387008" },
+  { name: "JRDA Dance Academy", category: "Classes & Activities", phone: "07554163790", website: "https://jeyaraveendran.co.uk" },
+  { name: "SERI Workout – Sudheerkumar", category: "Classes & Activities", phone: "07435386463", description: "CICL mobility + Zumba designed for 30+" },
+  { name: "Rang By Shreya – Art Classes", category: "Classes & Activities", phone: "+44 7901181746", website: "https://www.instagram.com/rangbyshreya", description: "Art classes for kids: STEAM, calligraphy, seasonal craft workshops" },
+  { name: "Diya Design – Craft Workshops", category: "Classes & Activities", phone: "07903885992", email: "deee.idc@gmail.com", description: "STEAM designing, calligraphy, seasonal creative craft workshops" },
+  { name: "RentLocal – DIY Tool Hire", category: "Hire Services", phone: "07880498050", website: "https://rentlocal.uk" },
+  { name: "Twin Stitch", category: "Tailoring & Alterations", phone: "07404 461274", email: "twinstitch.mk@gmail.com", description: "Clothing alterations & stitching, kids & adult dress alterations" },
+  { name: "Uktranslate Bureau – Reham", category: "Translation & Legal", phone: "07502638380", email: "info@uktbureau.uk", description: "Translation, legalisation and notarisation" },
+];
+// ============================================================
+
+const ALL = "All";
+var state = { query: "", category: ALL };
+
+function normalise(s) { return (s || "").toLowerCase(); }
+
+function cardHTML(s) {
+  var actions = '';
+  if (s.phone) {
+    actions += '<a class="btn-call" href="tel:' + s.phone.replace(/\s/g,'') + '">&#128222; ' + s.phone + '</a>';
+  }
+  if (s.email) {
+    actions += '<a class="btn-link" href="mailto:' + s.email + '">&#9993; ' + s.email + '</a>';
+  }
+  if (s.website) {
+    var label = s.website.replace(/^https?:\/\/(www\.)?/,'').replace(/\/$/,'');
+    actions += '<a class="btn-link" href="' + s.website + '" target="_blank" rel="noopener">&#127760; ' + label + '</a>';
+  }
+  return '<div class="card">'
+    + '<div class="card-top"><span class="card-category">' + s.category + '</span></div>'
+    + '<div class="card-name">' + s.name + '</div>'
+    + (s.description ? '<div class="card-desc">' + s.description + '</div>' : '')
+    + (actions ? '<div class="card-actions">' + actions + '</div>' : '')
+    + '</div>';
+}
+
+function render() {
+  var q = normalise(state.query);
+  var filtered = SERVICES.filter(function(s) {
+    if (state.category !== ALL && s.category !== state.category) return false;
+    if (!q) return true;
+    return normalise(s.name).includes(q) || normalise(s.category).includes(q)
+      || normalise(s.description).includes(q) || normalise(s.phone).includes(q)
+      || normalise(s.email).includes(q);
+  });
+
+  var grid = document.getElementById("grid");
+  var info = document.getElementById("results-info");
+  var count = filtered.length === SERVICES.length
+    ? SERVICES.length + " services listed"
+    : filtered.length + " result" + (filtered.length !== 1 ? "s" : "");
+  info.innerHTML = '<span>' + count + '</span>';
+
+  if (filtered.length === 0) {
+    grid.innerHTML = '<div class="state-msg"><p>&#128269;</p><p>No services found for <strong>' + state.query + '</strong></p></div>';
+    return;
+  }
+  grid.innerHTML = filtered.map(cardHTML).join("");
+}
+
+function buildFilters() {
+  var cats = [ALL].concat([...new Set(SERVICES.map(function(s){ return s.category; }))]);
+  var container = document.getElementById("filters");
+  container.innerHTML = cats.map(function(cat) {
+    return '<button class="filter-btn' + (cat === state.category ? ' active' : '') + '" data-cat="' + cat + '">' + cat + '</button>';
+  }).join("");
+  container.querySelectorAll(".filter-btn").forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      state.category = btn.dataset.cat;
+      buildFilters();
+      render();
+    });
+  });
+}
+
+document.getElementById("search").addEventListener("input", function(e) {
+  state.query = e.target.value;
+  render();
+});
+
+buildFilters();
+render();
+</script>
+</body>
+</html>

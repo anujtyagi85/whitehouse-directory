@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>FAQ Preview — Plumbers in Milton Keynes</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--g:#2d6a4f;--gl:#40916c;--gp:#d8f3dc;--t:#111827;--m:#6b7280;--b:#e5e7eb}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#f3f4f6;color:var(--t)}
+header{background:linear-gradient(135deg,#1b4332,#2d6a4f);color:#fff;padding:14px 16px}
+.hinner{display:flex;align-items:center;gap:8px}
+.hinner a{color:rgba(255,255,255,.75);text-decoration:none;font-size:.85rem}
+.sep{color:rgba(255,255,255,.4);font-size:.75rem}
+.page{max-width:580px;margin:0 auto;padding:20px 14px 60px}
+
+/* Intro answer paragraph */
+.intro{background:#fff;border-radius:12px;border-left:4px solid var(--g);padding:16px 18px;margin-bottom:20px;font-size:.92rem;line-height:1.6;color:var(--t)}
+.intro strong{color:var(--g)}
+
+/* Service card (simplified) */
+.card{background:#fff;border-radius:14px;border:1px solid var(--b);border-left:4px solid var(--g);padding:18px;margin-bottom:12px}
+.card h2{font-size:1rem;font-weight:700;margin-bottom:4px}
+.card p{font-size:.85rem;color:var(--m);margin-bottom:10px}
+.btn-call{display:inline-flex;align-items:center;gap:8px;background:#ecfdf5;color:#065f46;border:1.5px solid #6ee7b7;padding:9px 14px;border-radius:8px;font-size:.88rem;font-weight:700;text-decoration:none;margin-right:8px}
+
+/* FAQ section */
+.faq-section{margin-top:28px}
+.faq-section h2{font-size:1.1rem;font-weight:800;margin-bottom:16px;color:var(--t)}
+.faq-item{background:#fff;border-radius:12px;border:1px solid var(--b);margin-bottom:10px;overflow:hidden}
+.faq-q{width:100%;text-align:left;padding:16px 18px;background:none;border:none;font-size:.95rem;font-weight:600;color:var(--t);cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-family:inherit}
+.faq-q .arrow{font-size:.8rem;color:var(--m);transition:transform .2s}
+.faq-item.open .faq-q .arrow{transform:rotate(180deg)}
+.faq-a{display:none;padding:0 18px 16px;font-size:.88rem;color:var(--m);line-height:1.6;border-top:1px solid var(--b);padding-top:14px}
+.faq-item.open .faq-a{display:block}
+
+/* Page label */
+.label{background:#fff3cd;border:1px solid #ffc107;border-radius:8px;padding:10px 14px;font-size:.82rem;color:#856404;margin-bottom:20px;text-align:center}
+</style>
+</head>
+<body>
+<header>
+  <div class="hinner">
+    <a href="#">Directory</a>
+    <span class="sep">›</span>
+    <span style="color:#fff;font-size:.85rem">Plumbers</span>
+  </div>
+</header>
+
+<div class="page">
+
+  <div class="label">👀 This is a preview of what users will see</div>
+
+  <h1 style="font-size:1.45rem;font-weight:800;margin-bottom:6px">Plumbers in Milton Keynes</h1>
+  <p style="font-size:.82rem;color:var(--m);margin-bottom:16px">25 local listings · Whitehouse, Milton Keynes · Recommended by residents</p>
+
+  <!-- INTRO ANSWER PARAGRAPH — this is what AI engines quote -->
+  <div class="intro">
+    Looking for a <strong>plumber in Milton Keynes</strong>? Whitehouse MK Directory lists
+    <strong>25 trusted local plumbers</strong> serving Whitehouse, Fairfields and nearby
+    Milton Keynes areas — all recommended by local residents. Top rated include
+    Andrew Jones, Ben Brill and MK Fair Plumber.
+  </div>
+
+  <!-- Sample listings -->
+  <div class="card">
+    <h2>Andrew Jones</h2>
+    <p>Plumbing, electrical, kitchens, bathrooms</p>
+    <a class="btn-call" href="#">📞 07845 915231</a>
+    <a class="btn-call" href="#" style="background:#e7fce8;color:#128c2e;border-color:#86e58a">💬 WhatsApp</a>
+  </div>
+  <div class="card">
+    <h2>Ben Brill</h2>
+    <p>Experienced plumber for boiler repairs, installations, kitchens and bathrooms in MK.</p>
+    <a class="btn-call" href="#">📞 07825 887710</a>
+    <a class="btn-call" href="#" style="background:#e7fce8;color:#128c2e;border-color:#86e58a">💬 WhatsApp</a>
+  </div>
+
+  <!-- FAQ SECTION -->
+  <div class="faq-section">
+    <h2>Frequently asked questions</h2>
+
+    <div class="faq-item open">
+      <button class="faq-q" onclick="toggle(this)">
+        Who are the best plumbers in Milton Keynes?
+        <span class="arrow">▼</span>
+      </button>
+      <div class="faq-a">
+        Whitehouse MK Directory lists 25 trusted plumbers in Milton Keynes including Andrew Jones, Ben Brill, MK Fair Plumber and more — all recommended by local Whitehouse residents. You can call or WhatsApp them directly from each listing.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggle(this)">
+        How do I find an emergency plumber in Milton Keynes?
+        <span class="arrow">▼</span>
+      </button>
+      <div class="faq-a">
+        Browse the plumbers listed above and tap the phone number to call directly. Many are available for emergency callouts — WhatsApp is the fastest way to reach them out of hours.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggle(this)">
+        Are these plumbers based in Whitehouse, Milton Keynes?
+        <span class="arrow">▼</span>
+      </button>
+      <div class="faq-a">
+        Yes — all listings on Whitehouse MK Directory serve the Whitehouse area and wider Milton Keynes. They've been recommended by residents in the Whitehouse community.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggle(this)">
+        How can I add my plumbing business to this directory?
+        <span class="arrow">▼</span>
+      </button>
+      <div class="faq-a">
+        Tap the "Add your service" button at the bottom of the page, fill in your details and enter the community code shared in the Whitehouse residents group. Your listing goes live instantly.
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function toggle(btn){
+  var item=btn.closest('.faq-item');
+  item.classList.toggle('open');
+}
+</script>
+</body>
+</html>

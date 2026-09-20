@@ -1230,7 +1230,8 @@ footer a{color:var(--g);text-decoration:none;font-weight:600}
       <div class="fi-group">
         <label class="fl">Approximate budget</label>
         <div class="opt-grid" id="budget-opts">
-          <div class="opt" data-v="Under £500">Under £500</div>
+          <div class="opt" data-v="Under £100">Under £100</div>
+          <div class="opt" data-v="£100 – £500">£100 – £500</div>
           <div class="opt" data-v="£500 – £1,000">£500 – £1,000</div>
           <div class="opt" data-v="£1,000 – £2,500">£1,000 – £2,500</div>
           <div class="opt" data-v="£2,500+">£2,500+</div>
